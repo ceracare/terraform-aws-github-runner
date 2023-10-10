@@ -18,8 +18,8 @@ ${pre_install}
 yum update -y
 
 # Install docker
-amazon-linux-extras install docker
-service docker start
+yum install docker -y
+systemctl start docker
 usermod -a -G docker ec2-user
 
 yum install -y amazon-cloudwatch-agent curl jq git
