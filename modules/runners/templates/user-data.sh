@@ -22,7 +22,7 @@ yum install docker -y
 systemctl start docker
 usermod -a -G docker ec2-user
 
-yum install -y amazon-cloudwatch-agent curl jq git
+yum install -y amazon-cloudwatch-agent jq git
 
 user_name=ec2-user
 
