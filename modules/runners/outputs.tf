@@ -53,6 +53,6 @@ output "logfiles" {
 }
 
 output "runners_sg_id" {
-  value       = aws_security_group.runner_sg.id
+  value       = aws_security_group.runner_sg[0].id
   description = "ID of the security group."
 }
