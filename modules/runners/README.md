@@ -249,4 +249,5 @@ yarn run dist
 | <a name="output_role_scale_down"></a> [role\_scale\_down](#output\_role\_scale\_down) | n/a |
 | <a name="output_role_scale_up"></a> [role\_scale\_up](#output\_role\_scale\_up) | n/a |
 | <a name="output_runners_log_groups"></a> [runners\_log\_groups](#output\_runners\_log\_groups) | List of log groups from different log files of runner machine. |
+| <a name="output_runners_sg_id"></a> [runners\_sg\_id](#output\_runners\_sg\_id) | ID of the security group. |
 <!-- END_TF_DOCS -->
