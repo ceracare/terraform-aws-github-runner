@@ -12,6 +12,7 @@ variable "config" {
       security_group_ids             = list(string)
       runtime                        = string
       architecture                   = string
+      memory_size                    = number
       timeout                        = number
       zip                            = string
       subnet_ids                     = list(string)
@@ -49,18 +50,22 @@ variable "config" {
     instance_max_spot_price       = string
     prefix                        = string
     pool = list(object({
-      schedule_expression = string
-      size                = number
+      schedule_expression          = string
+      schedule_expression_timezone = string
+      size                         = number
     }))
     role_permissions_boundary            = string
     kms_key_arn                          = string
     ami_kms_key_arn                      = string
+    ami_id_ssm_parameter_arn             = string
     role_path                            = string
     ssm_token_path                       = string
     ssm_config_path                      = string
     ami_id_ssm_parameter_name            = string
     ami_id_ssm_parameter_read_policy_arn = string
     arn_ssm_parameters_path_config       = string
+    lambda_tags                          = map(string)
+    user_agent                           = string
   })
 }
 

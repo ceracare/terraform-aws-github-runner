@@ -1,11 +1,11 @@
 import { Octokit } from '@octokit/rest';
-import { createChildLogger } from '@terraform-aws-github-runner/aws-powertools-util';
+import { createChildLogger } from '@aws-github-runner/aws-powertools-util';
 import yn from 'yn';
 
 import { bootTimeExceeded, listEC2Runners } from '../aws/runners';
 import { RunnerList } from '../aws/runners.d';
-import { createGithubAppAuth, createGithubInstallationAuth, createOctoClient } from '../gh-auth/gh-auth';
-import { createRunners } from '../scale-runners/scale-up';
+import { createGithubAppAuth, createGithubInstallationAuth, createOctokitClient } from '../github/auth';
+import { createRunners, getGitHubEnterpriseApiUrl } from '../scale-runners/scale-up';
 
 const logger = createChildLogger('pool');
 
@@ -24,12 +24,11 @@ export async function adjust(event: PoolEvent): Promise<void> {
   const runnerGroup = process.env.RUNNER_GROUP_NAME || '';
   const runnerNamePrefix = process.env.RUNNER_NAME_PREFIX || '';
   const environment = process.env.ENVIRONMENT;
-  const ghesBaseUrl = process.env.GHES_URL;
   const ssmTokenPath = process.env.SSM_TOKEN_PATH;
   const ssmConfigPath = process.env.SSM_CONFIG_PATH || '';
   const subnets = process.env.SUBNET_IDS.split(',');
   const instanceTypes = process.env.INSTANCE_TYPES.split(',');
-  const instanceTargetTargetCapacityType = process.env.INSTANCE_TARGET_CAPACITY_TYPE;
+  const instanceTargetCapacityType = process.env.INSTANCE_TARGET_CAPACITY_TYPE;
   const ephemeral = yn(process.env.ENABLE_EPHEMERAL_RUNNERS, { default: false });
   const enableJitConfig = yn(process.env.ENABLE_JIT_CONFIG, { default: ephemeral });
   const disableAutoUpdate = yn(process.env.DISABLE_RUNNER_AUTOUPDATE, { default: false });
@@ -43,14 +42,11 @@ export async function adjust(event: PoolEvent): Promise<void> {
     ? (JSON.parse(process.env.ENABLE_ON_DEMAND_FAILOVER_FOR_ERRORS) as [string])
     : [];
 
-  let ghesApiUrl = '';
-  if (ghesBaseUrl) {
-    ghesApiUrl = `${ghesBaseUrl}/api/v3`;
-  }
+  const { ghesApiUrl, ghesBaseUrl } = getGitHubEnterpriseApiUrl();
 
   const installationId = await getInstallationId(ghesApiUrl, runnerOwner);
   const ghAuth = await createGithubInstallationAuth(installationId, ghesApiUrl);
-  const githubInstallationClient = await createOctoClient(ghAuth.token, ghesApiUrl);
+  const githubInstallationClient = await createOctokitClient(ghAuth.token, ghesApiUrl);
 
   // Get statusses of runners registed in GitHub
   const runnerStatusses = await getGitHubRegisteredRunnnerStatusses(
@@ -89,7 +85,7 @@ export async function adjust(event: PoolEvent): Promise<void> {
       {
         ec2instanceCriteria: {
           instanceTypes,
-          targetCapacityType: instanceTargetTargetCapacityType,
+          targetCapacityType: instanceTargetCapacityType,
           maxSpotPrice: instanceMaxSpotPrice,
           instanceAllocationStrategy: instanceAllocationStrategy,
         },
@@ -110,7 +106,7 @@ export async function adjust(event: PoolEvent): Promise<void> {
 
 async function getInstallationId(ghesApiUrl: string, org: string): Promise<number> {
   const ghAuth = await createGithubAppAuth(undefined, ghesApiUrl);
-  const githubClient = await createOctoClient(ghAuth.token, ghesApiUrl);
+  const githubClient = await createOctokitClient(ghAuth.token, ghesApiUrl);
 
   return (
     await githubClient.apps.getOrgInstallation({

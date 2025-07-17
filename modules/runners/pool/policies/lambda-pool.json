@@ -22,6 +22,7 @@
         {
             "Effect": "Allow",
             "Action": [
+                "ssm:AddTagsToResource",
                 "ssm:PutParameter"
             ],
             "Resource": "*"
@@ -37,6 +38,15 @@
             "${arn_ssm_parameters_path_config}",
             "${arn_ssm_parameters_path_config}/*"
           ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+              "ssm:GetParameters"
+            ],
+            "Resource": [
+                "${ssm_ami_id_parameter_arn}"
+            ]
         },
         {
             "Effect": "Allow",

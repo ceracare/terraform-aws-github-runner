@@ -9,6 +9,7 @@ module "pool" {
       ssl_verify = var.ghes_ssl_verify
       url        = var.ghes_url
     }
+    user_agent                    = var.user_agent
     github_app_parameters         = var.github_app_parameters
     instance_allocation_strategy  = var.instance_allocation_strategy
     instance_max_spot_price       = var.instance_max_spot_price
@@ -16,6 +17,7 @@ module "pool" {
     instance_types                = var.instance_types
     kms_key_arn                   = local.kms_key_arn
     ami_kms_key_arn               = local.ami_kms_key_arn
+    ami_id_ssm_parameter_arn      = local.ami_id_ssm_module_managed ? aws_ssm_parameter.runner_ami_id[0].arn : var.ami.id_ssm_parameter_arn
     lambda = {
       log_level                      = var.log_level
       logging_retention_in_days      = var.logging_retention_in_days
@@ -27,6 +29,7 @@ module "pool" {
       security_group_ids             = var.lambda_security_group_ids
       subnet_ids                     = var.lambda_subnet_ids
       architecture                   = var.lambda_architecture
+      memory_size                    = var.pool_lambda_memory_size
       runtime                        = var.lambda_runtime
       timeout                        = var.pool_lambda_timeout
       zip                            = local.lambda_zip
@@ -53,6 +56,7 @@ module "pool" {
     ami_id_ssm_parameter_name            = var.ami_id_ssm_parameter_name
     ami_id_ssm_parameter_read_policy_arn = var.ami_id_ssm_parameter_name != null ? aws_iam_policy.ami_id_ssm_parameter_read[0].arn : null
     tags                                 = local.tags
+    lambda_tags                          = var.lambda_tags
     arn_ssm_parameters_path_config       = local.arn_ssm_parameters_path_config
   }
 
